@@ -28,7 +28,7 @@ kotlin {
             api(libs.compose.runtime)
             api(libs.compose.ui)
             api(libs.kotlinx.datetime)
-            implementation(libs.compose.foundation)
+            api(libs.compose.foundation)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

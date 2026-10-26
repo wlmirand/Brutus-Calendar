@@ -7,11 +7,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.yearMonth
+import kotlinx.datetime.YearMonth
 import william.miranda.brutuscalendar.helper.NUM_DAYS_WEEK
 import william.miranda.brutuscalendar.model.DayRendererModel
 
@@ -19,8 +20,9 @@ import william.miranda.brutuscalendar.model.DayRendererModel
  * Grid definition for the Calendar
  */
 @Composable
-public fun CalendarGrid(
+internal fun CalendarGrid(
     modifier: Modifier = Modifier,
+    yearMonth: YearMonth,
     weekDays: List<DayOfWeek>,
     calendarDays: List<LocalDate>,
     startOffset: Int = 0,
@@ -28,6 +30,7 @@ public fun CalendarGrid(
     weekDayRenderer: @Composable BoxScope.(DayOfWeek) -> Unit,
     dayRenderer: @Composable BoxScope.(DayRendererModel) -> Unit
 ) {
+    //Add nulls to fulfill the 7 days per week
     val newDays = List(startOffset) { null } + calendarDays
 
     Column(
@@ -39,18 +42,21 @@ public fun CalendarGrid(
                 .fillMaxWidth()
         ) {
             weekDays.forEach { weekDay ->
-                //Wrap in a Box to ensure all cells will follow the Grid
-                Box(
-                    modifier = Modifier.weight(1f),
-                    contentAlignment = Alignment.Center
-                ) {
-                    weekDayRenderer(weekDay)
+                key(weekDay) {
+                    //Wrap in a Box to ensure that all cells follows the Grid
+                    Box(
+                        modifier = Modifier.weight(1f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        //Call the Renderer for each weekday
+                        weekDayRenderer(weekDay)
+                    }
                 }
             }
 
         }
 
-        //Render the Days
+        //Render the Days. Take 7 each time
         newDays.chunked(columns).forEach { rowDays ->
             Row(
                 modifier = Modifier
@@ -63,16 +69,19 @@ public fun CalendarGrid(
                             modifier = Modifier.weight(1f)
                         )
                     } else {
-                        //Wrap in a Box to ensure all cells will follow the Grid
-                        Box(
-                            modifier = Modifier.weight(1f),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            //Render each Day
-                            DayRendererModel(
-                                date = date,
-                                calendarYearMonth = date.yearMonth
-                            ).also { model -> dayRenderer(model) }
+                        // Keep remembered cell state associated with its date within this row.
+                        key(date) {
+                            //Wrap in a Box to ensure that all cells follows the Grid
+                            Box(
+                                modifier = Modifier.weight(1f),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                //Render each Day
+                                DayRendererModel(
+                                    date = date,
+                                    calendarYearMonth = yearMonth
+                                ).also { model -> dayRenderer(model) }
+                            }
                         }
                     }
                 }

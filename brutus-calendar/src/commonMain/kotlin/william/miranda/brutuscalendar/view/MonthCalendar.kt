@@ -31,15 +31,24 @@ public fun MonthCalendar(
     startingWeekDay: DayOfWeek = DayOfWeek.SUNDAY,
     displayExtraDays: Boolean = false,
     dayOnClick: ((LocalDate) -> Unit)? = null,
-    headerRenderer: @Composable (YearMonth) -> Unit = {  yearMonth -> DefaultHeaderRenderer(yearMonth) },
-    weekDayRenderer: @Composable BoxScope.(DayOfWeek) -> Unit = { dayOfWeek -> DefaultWeekDayRenderer(dayOfWeek) },
-    dayRenderer: @Composable BoxScope.(DayRendererModel) -> Unit = { model -> DefaultDayRenderer(model, dayOnClick) }
+    headerRenderer: @Composable (YearMonth) -> Unit = { yearMonth -> DefaultHeaderRenderer(yearMonth) },
+    weekDayRenderer: @Composable BoxScope.(DayOfWeek) -> Unit = { dayOfWeek ->
+        DefaultWeekDayRenderer(
+            dayOfWeek
+        )
+    },
+    dayRenderer: @Composable BoxScope.(DayRendererModel) -> Unit = { model ->
+        DefaultDayRenderer(
+            model,
+            dayOnClick
+        )
+    }
 ) {
     //List to Hold the Week Days, in the order we should display them
     val weekDays = remember(startingWeekDay) { getWeekDays(startingWeekDay) }
 
     //Offset for the First Day... This is needed only when not displaying extra days
-    val firstDayOffset = remember(yearMonth, startingWeekDay) {
+    val firstDayOffset = remember(yearMonth, startingWeekDay, displayExtraDays) {
         if (displayExtraDays) {
             0
         } else {
@@ -48,7 +57,7 @@ public fun MonthCalendar(
     }
 
     //We need to check if we have to display extra days because this will change first and last days
-    val firstDay = remember(displayExtraDays, yearMonth) {
+    val firstDay = remember(displayExtraDays, yearMonth, weekDays) {
         if (!displayExtraDays) {
             yearMonth.firstDay
         } else {
@@ -57,7 +66,7 @@ public fun MonthCalendar(
         }
     }
 
-    val lastDay = remember(displayExtraDays, yearMonth) {
+    val lastDay = remember(displayExtraDays, yearMonth, weekDays) {
         if (!displayExtraDays) {
             yearMonth.lastDay
         } else {
@@ -66,7 +75,7 @@ public fun MonthCalendar(
         }
     }
 
-    Column {
+    Column(modifier = modifier) {
         //Header
         if (displayHeader) {
             headerRenderer(yearMonth)
@@ -74,7 +83,8 @@ public fun MonthCalendar(
 
         //Grid
         CalendarGrid(
-            modifier = modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
+            yearMonth = yearMonth,
             weekDays = if (displayWeekDaysName) weekDays else emptyList(),
             calendarDays = (firstDay..lastDay).toList(),
             startOffset = firstDayOffset,

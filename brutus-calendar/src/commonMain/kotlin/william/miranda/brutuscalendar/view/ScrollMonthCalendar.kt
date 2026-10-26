@@ -5,6 +5,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -57,11 +58,14 @@ public fun ScrollMonthCalendar(
     weekDayRenderer: @Composable BoxScope.(DayOfWeek) -> Unit = { DefaultWeekDayRenderer(it) },
     dayRenderer: @Composable BoxScope.(DayRendererModel) -> Unit = { DefaultDayRenderer(it, dayOnClick) },
 ) {
+    // Keep the latest listener without restarting the page observation.
+    val currentOnMonthChangedListener = rememberUpdatedState(onMonthChangedListener)
+
     //SideEffect for the PageChanged callback
     LaunchedEffect(pagerState) {
-        snapshotFlow { pagerState.currentPage }.collect { pageNumber ->
+        snapshotFlow { pagerState.settledPage }.collect { pageNumber ->
             val yearMonth = pagerState.getYearMonthFromPageNumber(pageNumber)
-            onMonthChangedListener?.invoke(yearMonth)
+            currentOnMonthChangedListener.value?.invoke(yearMonth)
         }
     }
 
