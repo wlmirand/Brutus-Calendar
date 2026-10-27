@@ -1,12 +1,8 @@
 package william.miranda.brutuscalendar.view
 
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -20,10 +16,10 @@ import kotlinx.datetime.yearMonth
 import william.miranda.brutuscalendar.helper.DefaultDayRenderer
 import william.miranda.brutuscalendar.helper.DefaultHeaderRenderer
 import william.miranda.brutuscalendar.helper.DefaultWeekDayRenderer
-import william.miranda.brutuscalendar.helper.NUM_DAYS_WEEK
 import william.miranda.brutuscalendar.helper.getWeekDays
 import william.miranda.brutuscalendar.helper.toList
 import william.miranda.brutuscalendar.model.DayRendererModel
+import william.miranda.brutuscalendar.view.cells.WeekGrid
 
 /**
  * Composable to display the Week Calendar
@@ -38,32 +34,32 @@ public fun WeekCalendar(
     startingWeekDay: DayOfWeek = DayOfWeek.SUNDAY,
     displayExtraDays: Boolean = false,
     dayOnClick: ((LocalDate) -> Unit)? = null,
-    dayRenderer: @Composable RowScope.(DayRendererModel) -> Unit = { model ->
+    headerRenderer: @Composable (YearMonth) -> Unit = { yearMonth -> DefaultHeaderRenderer(yearMonth) },
+    weekDayRenderer: @Composable BoxScope.(DayOfWeek) -> Unit = { dayOfWeek ->
+        DefaultWeekDayRenderer(
+            dayOfWeek
+        )
+    },
+    dayRenderer: @Composable BoxScope.(DayRendererModel) -> Unit = { model ->
         DefaultDayRenderer(
             model,
             dayOnClick
         )
-    },
-    headerRenderer: @Composable (YearMonth) -> Unit = { yearMonth -> DefaultHeaderRenderer(yearMonth) },
-    weekDayRenderer: @Composable RowScope.(DayOfWeek) -> Unit = { dayOfWeek ->
-        DefaultWeekDayRenderer(
-            dayOfWeek
-        )
     }
 ) {
     //List to Hold the Week Days, in the order we should display them
-    val weekDays = remember { getWeekDays(startingWeekDay) }
+    val weekDays = remember(startingWeekDay) { getWeekDays(startingWeekDay) }
 
-    //First Day to be displayed
-    val firstDay = remember {
+    //First Day of the Week
+    val firstDay = remember(date, weekDays) {
         getFirstDay(
             day = date,
             weekDays = weekDays
         )
     }
 
-    //Last Day to be displayed
-    val lastDay = remember {
+    //Last Day of the Week
+    val lastDay = remember(date, weekDays) {
         getLastDay(
             day = date,
             weekDays = weekDays
@@ -71,63 +67,42 @@ public fun WeekCalendar(
     }
 
     //List of the interval to be displayed
-    val daysList = remember {
+    //We need to prepare a list of 7 elements to be displayed (ensured by firstDay..lastDay)
+    //If by any means the item should not be displayed, we set it to null
+    val daysList = remember(firstDay, lastDay, displayExtraDays) {
         val list = (firstDay..lastDay).toList(DateTimeUnit.DAY)
+
         if (!displayExtraDays) {
-            list.filter {
-                it.month == date.month
+            //No extra days, so we need to check elements to be excluded
+            list.map { element ->
+                if (element.month == date.month) element else null
             }
-        } else list
+        } else {
+            //Display extra days so, just return the original list
+            list
+        }
     }
 
-    //Offset for the First Day
-    val firstDayOffset = remember { weekDays.indexOf(firstDay.dayOfWeek) }
-
-    Column {
+    Column(modifier = modifier) {
         //Header
         if (displayHeader) {
             headerRenderer(date.yearMonth)
         }
 
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(NUM_DAYS_WEEK),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalArrangement = Arrangement.SpaceEvenly,
-            userScrollEnabled = false,
-            modifier = modifier
-        ) {
-
-            //Weekday Label
-            if (displayWeekDaysName) {
-                items(
-                    items = weekDays,
-                    key = { it.ordinal }
-                ) { /*weekDayRenderer(it)*/ }
-            }
-
-            //Start Offset
-            if (firstDayOffset != 0 && !displayExtraDays) {
-                item(
-                    span = { GridItemSpan(firstDayOffset) }
-                ) {}
-            }
-
-            //Days
-            items(
-                items = daysList,
-                key = { it.toString() }
-            ) {
-                DayRendererModel(
-                    date = it,
-                    calendarYearMonth = date.yearMonth,
-                ).also { /*dayRenderer(it)*/ }
-            }
-        }
+        //Grid
+        WeekGrid(
+            modifier = Modifier.fillMaxWidth(),
+            yearMonth = date.yearMonth,
+            weekDays = if (displayWeekDaysName) weekDays else emptyList(),
+            calendarDays = daysList,
+            weekDayRenderer = weekDayRenderer,
+            dayRenderer = dayRenderer
+        )
     }
 }
 
 /**
- * Return the first day that should be displayed by the Calendar
+ * Return the first day of the week that contains [day] based on the [weekDays]
  */
 private fun getFirstDay(
     day: LocalDate,
@@ -140,8 +115,7 @@ private fun getFirstDay(
 }
 
 /**
- * Return the last day that should be displayed by the Calendar
- * depending on if we want or not complete the Extra Days from the Next Period
+ * Return the last day of the week that contains [day] based on the [weekDays]
  */
 private fun getLastDay(
     day: LocalDate,

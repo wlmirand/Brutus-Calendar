@@ -1,165 +1,339 @@
 # BrutusCalendar
 
-A Compose Multiplatform library scaffold by William Miranda, licensed under Apache-2.0.
+A customizable Compose Multiplatform calendar library by William Miranda, licensed under Apache-2.0.
 
-**The calendar is not implemented in this repository yet.** The demo only contains
-a placeholder screen. This project is ready to receive the existing calendar code
-without defining the library API in advance.
+Display a static month or week, or browse either with a horizontal pager. Customize
+the header, weekday labels, and day cells through composable lambdas.
 
-## Project structure
+The library uses Compose Runtime, UI, Foundation, and kotlinx-datetime, with **no
+Material dependency**. The demo uses Material 3 to show a styled calendar with
+navigation, date selection, and light/dark themes.
 
-| Directory | Purpose |
-| --- | --- |
-| `brutus-calendar/` | Publishable KMP library with no Material dependency |
-| `demo/` | Shared demo UI using Material 3 |
-| `androidApp/` | Android application |
-| `iosApp/` | SwiftUI/Xcode application integrated directly with the demo framework |
-| `.github/workflows/` | Validation and manually triggered uploads to Maven Central |
+## Features
 
-The root Gradle project is only an aggregator. Only `brutus-calendar` is published.
+- Static monthly and weekly calendars.
+- Horizontal month and week pagers with programmatic navigation.
+- Customizable headers, weekday labels, and date cells.
+- Configurable first weekday and optional adjacent-month dates.
+- Date click callbacks and settled-page change listeners.
+- Consumer-owned selection state and styling, without requiring Material.
 
-## Platforms and tools
+## Supported platforms
 
-- Android **8.0+ (API 26)**; compile/target SDK **37**.
+- Android **8.0+ (API 26)**.
 - iOS **15+**: ARM64 devices and Apple Silicon simulators (`iosArm64`, `iosSimulatorArm64`).
-- Desktop, Web, and Intel iOS simulator targets are outside the initial scope.
-- JDK **21** for Gradle and the toolchain; Android JVM **17** bytecode.
-- For iOS: macOS, **Xcode 26.4**, and an installed simulator runtime.
-- Android Studio compatible with AGP 9.3.1 and Android SDK Platform 37 / Build Tools 36.0.0.
+- Desktop, Web, and Intel iOS simulators are not currently targeted.
 
-Versions checked on **October 26, 2026**:
+## Installation
 
-| Component | Version |
-| --- | --- |
-| Kotlin and Compose Compiler | 2.4.21 |
-| Compose Multiplatform | 1.12.2 |
-| Android Gradle Plugin | 9.3.1 |
-| Gradle Wrapper | 9.7.0 |
-| Material 3 Multiplatform (demo) | 1.9.0 |
-| Activity Compose (Android demo) | 1.13.0 |
-| Vanniktech Maven Publish | 0.37.0 |
-
-Plugin and library versions are defined in `gradle/libs.versions.toml`.
-The Wrapper is configured in `gradle/wrapper/gradle-wrapper.properties`, including the distribution checksum.
-Material 3 is versioned independently of Compose Multiplatform.
-
-Gradle 9.8.2 and AGP 9.4.1 were already available when checked, but were not selected:
-the [official Kotlin 2.4.21 compatibility matrix](https://www.jetbrains.com/help/kotlin-multiplatform-dev/multiplatform-compatibility-guide.html)
-declares support up to Gradle 9.7.0 and AGP 9.3.1. No prerelease versions were selected.
-See also [Compose Multiplatform compatibility](https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-compatibility-and-versioning.html).
-
-## Running the demo
-
-The commands below are instructions for local use; no builds were run when this
-scaffold was created. The first Gradle sync or execution downloads the distribution
-and dependencies. iOS builds may also download Kotlin/Native tools.
-
-### Android
-
-1. Open the project root in Android Studio with JDK 21 configured.
-2. Configure the SDK through Android Studio or in `local.properties` (not tracked):
-   `sdk.dir=/path/to/Android/sdk`.
-3. Run the `androidApp` module configuration on an API 26+ emulator or device.
-
-Alternatively, with the environment already configured:
-
-```sh
-./gradlew :androidApp:assembleDebug
-./gradlew :androidApp:installDebug
-```
-
-### iOS
-
-1. On your Mac, set `JAVA_HOME` to JDK 21 and select Xcode 26.4.
-2. Set up the Android SDK as well: the same Gradle project includes the Android modules.
-3. Open `iosApp/iosApp.xcodeproj` and select the `iosApp` scheme.
-4. Select an Apple Silicon simulator and run the app. For a physical device,
-   configure your team under **Signing & Capabilities**.
-
-The **Build Kotlin framework** phase calls `:demo:embedAndSignAppleFrameworkForXcode`
-before compiling Swift. Neither CocoaPods nor another project generation tool is required.
-The deployment target is set in `iosApp/iosApp.xcodeproj/project.pbxproj` (15.0),
-which is also the default minimum for Kotlin/Native 2.4.21.
-
-## Adding the calendar
-
-Place the shared code in:
-
-```text
-brutus-calendar/src/commonMain/kotlin/william/miranda/brutuscalendar/
-```
-
-`Calendar.kt` only contains a comment and can be replaced with your code.
-The library already depends on Compose Runtime, UI, and Foundation. `explicitApi()`
-requires explicit visibility and types in the public API. Add tests under
-`brutus-calendar/src/commonTest/kotlin/` when adding the implementation.
-
-The demo already depends on the library module. Replace the placeholder screen in
-`demo/src/commonMain/kotlin/william/miranda/brutuscalendar/demo/App.kt`
-with examples using the actual API.
-
-## Publishing
-
-Configured coordinates, **not published yet**:
+In a Compose Multiplatform project, make sure Maven Central is available in your
+`settings.gradle.kts` repositories:
 
 ```kotlin
-implementation("io.github.wlmirand:brutus-calendar:0.1.0")
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
 ```
 
-The Kotlin package remains `william.miranda.brutuscalendar`, independently of the
-Maven Group ID. `GROUP` and `VERSION_NAME` are defined in `gradle.properties`.
+Add the library to your shared module's `build.gradle.kts`:
 
-Before the first publication:
-
-1. Create the `wlmirand/BrutusCalendar` repository on GitHub and push the code yourself.
-2. Add the implementation and its tests; do not publish just the scaffold.
-3. Register with the [Sonatype Central Portal](https://central.sonatype.com/) and
-   verify the **`io.github.wlmirand`** namespace. The namespace has not been verified yet.
-4. Generate a **Central Portal user token** (not your login password).
-5. Prepare a GPG signing key and distribute its **public** key to a keyserver
-   accepted by Central. Follow the [official requirements](https://central.sonatype.org/publish/requirements/gpg/).
-6. Create the **`maven-central`** GitHub environment, preferably with required
-   approval and restricted to the default branch, and configure these secrets:
-
-   | Secret | Contents |
-   | --- | --- |
-   | `MAVEN_CENTRAL_USERNAME` | Username from the Central Portal user token |
-   | `MAVEN_CENTRAL_PASSWORD` | Password from the same user token |
-   | `SIGNING_IN_MEMORY_KEY` | Complete multiline ASCII-armored GPG private key |
-   | `SIGNING_IN_MEMORY_KEY_PASSWORD` | GPG key passphrase, if any |
-
-7. Wait for CI validation. Under **Actions → Publish to Maven Central → Run workflow**,
-   select the default branch and enter the version already defined in `gradle.properties`.
-8. The workflow uploads signed Android and iOS publications and KMP metadata, but
-   **does not release automatically**. Review the deployment in the Central Portal
-   and click **Publish**. Published versions cannot be overwritten.
-
-Never store tokens, passwords, or private keys in the repository or send them to the agent.
-The workflow does not create tags, commits, GitHub releases, or pushes.
-
-To publish only to Maven Local without credentials or signing (use macOS to
-generate all iOS targets):
-
-```sh
-./gradlew :brutus-calendar:publishToMavenLocal
+```kotlin
+kotlin {
+    sourceSets {
+        commonMain.dependencies {
+            implementation("io.github.wlmirand:brutus-calendar:0.1.0")
+        }
+    }
+}
 ```
 
-The plugin generates a sources JAR and an empty javadoc JAR by default. Once the
-API exists, adding KDoc/Dokka documentation before a public release is recommended.
-For details, see the [publishing plugin documentation](https://vanniktech.github.io/gradle-maven-publish-plugin/central/).
+**Version 0.1.0 is not published yet.** The dependency above will resolve once
+that release is available on Maven Central. Within this repository, use
+`implementation(project(":brutus-calendar"))` instead.
 
-## CI and validation status
+The library currently uses Kotlin **2.4.21**, Compose Multiplatform **1.12.2**, and
+kotlinx-datetime **0.8.0**. Use compatible Kotlin and Compose versions in your
+application. A Material dependency is only needed if your custom renderers use it.
 
-- `validate.yml`: builds the Android demo, runs `check` on the library, and, on
-  macOS, builds the iOS app without signing and runs simulator tests when available.
-- `publish.yml`: manually triggered on the default branch only, with secrets
-  exposed only to the Central Portal upload step.
-- Actions are pinned by SHA. The Gradle Wrapper was obtained from the official
-  upstream, and its JAR SHA-256 was checked against the checksum published by Gradle.
-- The workflows assume a `macos-26` runner with Xcode 26.4 available; adjust the
-  runner if necessary based on the images available in GitHub Actions.
-- **Builds, tests, and workflows have not been run yet.** Compatibility was selected
-  based on documentation, not confirmed by compilation.
+## Using the monthly calendar
+
+The public calendar composables are in `william.miranda.brutuscalendar.view`.
+Date and month values come from `kotlinx.datetime`.
+
+### Static month
+
+```kotlin
+import androidx.compose.runtime.Composable
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.YearMonth
+import william.miranda.brutuscalendar.view.MonthCalendar
+
+@Composable
+fun StaticMonthExample() {
+    MonthCalendar(
+        yearMonth = YearMonth(2026, 9),
+        startingWeekDay = DayOfWeek.SUNDAY,
+        displayExtraDays = true,
+        dayOnClick = { date ->
+            // Handle the date selected through the default day renderer.
+        },
+    )
+}
+```
+
+### Scrollable months
+
+```kotlin
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import kotlinx.datetime.YearMonth
+import william.miranda.brutuscalendar.model.YearMonthPagerState
+import william.miranda.brutuscalendar.view.ScrollMonthCalendar
+
+@Composable
+fun ScrollableMonthExample() {
+    val pagerState = remember {
+        YearMonthPagerState(
+            startingYearMonth = YearMonth(2026, 9),
+            firstYearMonth = YearMonth(2026, 1),
+            lastYearMonth = YearMonth(2026, 12),
+        )
+    }
+
+    ScrollMonthCalendar(
+        pagerState = pagerState,
+        displayExtraDays = true,
+        onMonthChangedListener = { yearMonth ->
+            // Update other UI when the pager settles on a month.
+        },
+    )
+}
+```
+
+`firstYearMonth` and `lastYearMonth` are inclusive. Supply an ordered interval
+containing `startingYearMonth`. Keep the state remembered rather than constructing
+a new instance on each recomposition.
+
+This example uses `remember`: it retains the state across
+recompositions, but does not provide persistence across activity or process recreation.
+The library also exposes `rememberYearMonthPagerState`; its saved-state behavior
+still requires platform validation before relying on it for persistence.
+
+`onMonthChangedListener` observes `settledPage`, so it fires initially and when the
+pager settles on a different page, rather than on every intermediate page during
+a gesture. Replacing the listener alone does not trigger a new notification.
+
+To navigate from buttons, call the state's suspend functions from a coroutine:
+
+- `scrollToYearMonth` / `animateScrollToYearMonth`
+- `scrollToPreviousPage` / `animateScrollToPreviousPage`
+- `scrollToNextPage` / `animateScrollToNextPage`
+
+Use `rememberCoroutineScope` for UI-triggered navigation and disable navigation
+buttons at the first/last page and while scrolling.
+
+### Display options
+
+Both monthly composables accept:
+
+| Parameter | Default | Behavior |
+| --- | --- | --- |
+| `displayHeader` | `true` | Show the month header |
+| `displayWeekDaysName` | `true` | Show weekday labels |
+| `startingWeekDay` | `DayOfWeek.SUNDAY` | Choose the first weekday column |
+| `displayExtraDays` | `false` | Fill leading/trailing cells with adjacent-month dates |
+| `dayOnClick` | `null` | Click callback used by the default day renderer |
+
+Extra days complete the first and last weeks; they do **not** force a fixed
+six-week grid. The calendar does not own selection state or automatically
+navigate when an adjacent-month date is clicked.
+
+### Custom renderers
+
+Both monthly composables accept these slots:
+
+| Slot | Signature | Purpose |
+| --- | --- | --- |
+| `headerRenderer` | `@Composable (YearMonth) -> Unit` | Month header, optionally including navigation |
+| `weekDayRenderer` | `@Composable BoxScope.(DayOfWeek) -> Unit` | Weekday label |
+| `dayRenderer` | `@Composable BoxScope.(DayRendererModel) -> Unit` | Date cell |
+
+`DayRendererModel.date` is the cell's date. `calendarYearMonth` is the month being
+displayed, which may differ from the cell's month when extra days are enabled.
+The slots do not require Material; the default renderers use Foundation `BasicText`.
+
+Here is a custom day renderer with externally owned selection and no Material dependency:
+
+```kotlin
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.YearMonth
+import william.miranda.brutuscalendar.view.MonthCalendar
+
+@Composable
+fun CustomDayExample() {
+    var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
+
+    MonthCalendar(
+        yearMonth = YearMonth(2026, 9),
+        dayRenderer = { model ->
+            BasicText(
+                text = model.date.day.toString(),
+                modifier = Modifier
+                    .clickable { selectedDate = model.date }
+                    .padding(8.dp),
+                style = TextStyle(
+                    fontWeight = if (selectedDate == model.date) {
+                        FontWeight.Bold
+                    } else {
+                        FontWeight.Normal
+                    },
+                ),
+            )
+        },
+    )
+}
+```
+
+**Custom day renderers own their click handling.** Passing `dayOnClick` does not
+automatically make a custom renderer clickable. See `DemoDayCell` for the Material 3 version.
+
+Keep selection or other persistent date-specific state outside individual cells.
+Do not rely on a cell's local `remember` state surviving navigation between pages
+or changes to the calendar layout.
+
+## Using the weekly calendar
+
+### Static week
+
+`WeekCalendar` displays the week containing a reference `date`:
+
+```kotlin
+import androidx.compose.runtime.Composable
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDate
+import william.miranda.brutuscalendar.view.WeekCalendar
+
+@Composable
+fun StaticWeekExample() {
+    WeekCalendar(
+        date = LocalDate(2026, 7, 1),
+        startingWeekDay = DayOfWeek.MONDAY,
+        displayExtraDays = true,
+        dayOnClick = { date ->
+            // Handle clicks through the default day renderer.
+        },
+    )
+}
+```
+
+The example displays June 29 through July 5. The header and
+`DayRendererModel.calendarYearMonth` use the reference date's month, July.
+With `displayExtraDays = false`, dates outside that month are replaced with
+empty cells, preserving their weekday columns. With `true`, all seven dates are shown.
+
+### Scrollable weeks
+
+Configure the first weekday on the state, not on `ScrollWeekCalendar`:
+
+```kotlin
+import androidx.compose.runtime.Composable
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDate
+import william.miranda.brutuscalendar.view.ScrollWeekCalendar
+import william.miranda.brutuscalendar.view.rememberWeekPagerState
+
+@Composable
+fun ScrollableWeekExample() {
+    val pagerState = rememberWeekPagerState(
+        firstDate = LocalDate(2026, 7, 6),
+        lastDate = LocalDate(2026, 8, 2),
+        startingDate = LocalDate(2026, 7, 13),
+        startingDayOfWeek = DayOfWeek.MONDAY,
+    )
+
+    ScrollWeekCalendar(
+        pagerState = pagerState,
+        displayExtraDays = true,
+        onWeekChangedListener = { date ->
+            // React to the reference date of the settled page.
+        },
+    )
+}
+```
+
+This example uses a Monday-aligned interval covering four complete weeks and
+starts on its second page. `startingDate` selects the initial position;
+`firstDate` and `lastDate` configure the interval. Supply an ordered interval
+containing `startingDate`.
+
+`rememberWeekPagerState` requires `startingDayOfWeek` and defaults `startingDate`
+to `firstDate`. If no state is supplied to `ScrollWeekCalendar`, its default
+state uses Sunday as the first weekday, January 1 of year 0 as `firstDate`, and
+December 31 of year 9999 as `lastDate`. Pass an explicit state to choose a
+practical interval and initial date.
+
+`WeekPagerState.startingDayOfWeek` is the single source of the first-weekday
+configuration for the pager and its rendered weeks. Unlike `WeekCalendar`,
+`ScrollWeekCalendar` does **not** accept a separate `startingWeekDay` parameter.
+
+The remembered state reconstructs the starting date, first weekday, and date
+bounds. It does not save the current page or fractional scroll offset. Its saved-state behavior
+still requires validation; no process-recreation guarantee is made here.
+Factory arguments initialize the state rather than reactively updating an existing
+instance on recomposition.
+
+### Weekly navigation and callbacks
+
+`WeekPagerState` exposes:
+
+- `getPageNumberFromDate(date)`
+- `getFirstDateFromPageNumber(pageNumber)`
+- `scrollToDate` / `animateScrollToDate`
+- `scrollToPreviousPage` / `animateScrollToPreviousPage`
+- `scrollToNextPage` / `animateScrollToNextPage`
+
+Call suspend navigation functions from a coroutine and disable previous/next
+controls at the interval boundaries, as in the monthly demo.
+
+`onWeekChangedListener` observes `settledPage`, fires initially and when the
+settled page changes, and reports the same reference date used for rendering.
+Replacing the listener alone does not trigger a new notification.
+
+Despite its name, `getFirstDateFromPageNumber` currently returns a **page reference
+date** computed as `firstDate + pageNumber * one week`. It is only the first
+visible weekday when `firstDate` is aligned with `startingDayOfWeek`.
+`WeekCalendar` expands that reference into a calendar week. For unaligned bounds,
+verify navigation and initial-page mapping for your use case. Date bounds are
+not a cell-level click filter; `displayExtraDays` controls adjacent-month dates,
+not whether a date falls inside the pager interval.
+
+Both weekly composables accept `displayHeader`, `displayWeekDaysName`,
+`displayExtraDays`, `dayOnClick`, and the same renderer signatures as the monthly
+composables. Custom renderers own their click handling and should keep persistent
+selection outside the cells.
+
+## Customization example
+
+For a complete Material 3 example with navigation, selection, and light/dark
+themes, see the demo's
+[`App.kt`](demo/src/commonMain/kotlin/william/miranda/brutuscalendar/demo/App.kt)
+and reusable
+[`CalendarRenderers.kt`](demo/src/commonMain/kotlin/william/miranda/brutuscalendar/demo/CalendarRenderers.kt).
 
 ## License
 

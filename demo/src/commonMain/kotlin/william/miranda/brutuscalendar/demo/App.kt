@@ -27,11 +27,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.Month
 import kotlinx.datetime.YearMonth
-import kotlinx.coroutines.launch
 import william.miranda.brutuscalendar.helper.today
 import william.miranda.brutuscalendar.model.YearMonthPagerState
 import william.miranda.brutuscalendar.view.ScrollMonthCalendar
@@ -124,7 +124,7 @@ fun App() {
                                 selected = selectedDate == model.date,
                                 onClick = { selectedDate = model.date },
                             )
-                        },
+                        }
                     )
                 }
 

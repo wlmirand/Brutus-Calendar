@@ -17,7 +17,7 @@ import william.miranda.brutuscalendar.helper.DefaultHeaderRenderer
 import william.miranda.brutuscalendar.helper.DefaultWeekDayRenderer
 import william.miranda.brutuscalendar.helper.getWeekDays
 import william.miranda.brutuscalendar.model.DayRendererModel
-import william.miranda.brutuscalendar.view.cells.CalendarGrid
+import william.miranda.brutuscalendar.view.cells.MonthGrid
 
 /**
  * Composable to display the Calendar for a given Month
@@ -82,7 +82,7 @@ public fun MonthCalendar(
         }
 
         //Grid
-        CalendarGrid(
+        MonthGrid(
             modifier = Modifier.fillMaxWidth(),
             yearMonth = yearMonth,
             weekDays = if (displayWeekDaysName) weekDays else emptyList(),

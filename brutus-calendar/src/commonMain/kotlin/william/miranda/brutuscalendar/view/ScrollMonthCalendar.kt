@@ -14,11 +14,9 @@ import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.Month
 import kotlinx.datetime.YearMonth
-import kotlinx.datetime.yearMonth
 import william.miranda.brutuscalendar.helper.DefaultDayRenderer
 import william.miranda.brutuscalendar.helper.DefaultHeaderRenderer
 import william.miranda.brutuscalendar.helper.DefaultWeekDayRenderer
-import william.miranda.brutuscalendar.helper.today
 import william.miranda.brutuscalendar.model.DayRendererModel
 import william.miranda.brutuscalendar.model.YearMonthPagerState
 
@@ -27,9 +25,9 @@ import william.miranda.brutuscalendar.model.YearMonthPagerState
  */
 @Composable
 public fun rememberYearMonthPagerState(
-    startingYearMonth: YearMonth = LocalDate.today().yearMonth,
     firstYearMonth: YearMonth = YearMonth(year = 0, month = Month.JANUARY),
-    lastYearMonth: YearMonth = YearMonth(year = 9999, month = Month.DECEMBER)
+    lastYearMonth: YearMonth = YearMonth(year = 9999, month = Month.DECEMBER),
+    startingYearMonth: YearMonth = firstYearMonth,
 ): YearMonthPagerState {
     return rememberSaveable(saver = YearMonthPagerState.Saver) {
         YearMonthPagerState(

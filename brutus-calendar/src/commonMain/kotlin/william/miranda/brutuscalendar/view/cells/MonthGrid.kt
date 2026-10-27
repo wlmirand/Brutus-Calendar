@@ -17,10 +17,10 @@ import william.miranda.brutuscalendar.helper.NUM_DAYS_WEEK
 import william.miranda.brutuscalendar.model.DayRendererModel
 
 /**
- * Grid definition for the Calendar
+ * Grid definition for the Month Calendar
  */
 @Composable
-internal fun CalendarGrid(
+internal fun MonthGrid(
     modifier: Modifier = Modifier,
     yearMonth: YearMonth,
     weekDays: List<DayOfWeek>,
