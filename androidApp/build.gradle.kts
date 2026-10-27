@@ -18,6 +18,14 @@ android {
         versionName = project.version.toString()
     }
 
+    // Use the local debug key only to install the release demo for performance testing.
+    buildTypes {
+        getByName("release") {
+            isDebuggable = false
+            signingConfig = signingConfigs.getByName("debug")
+        }
+    }
+
     buildFeatures { compose = true }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
