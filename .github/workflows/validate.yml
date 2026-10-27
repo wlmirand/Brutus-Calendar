@@ -24,7 +24,7 @@ jobs:
           distribution: temurin
           java-version: '21'
       - uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
-      - run: sdkmanager 'platforms;android-37' 'build-tools;36.0.0'
+      - run: sdkmanager 'platforms;android-37.0' 'build-tools;36.0.0'
       - uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
       - name: Build Android demo and check library
         run: ./gradlew :androidApp:assembleDebug :brutus-calendar:check --stacktrace
@@ -43,13 +43,14 @@ jobs:
         with:
           xcode-version: '26.4'
       - uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
-      - run: sdkmanager 'platforms;android-37' 'build-tools;36.0.0'
+      - run: sdkmanager 'platforms;android-37.0' 'build-tools;36.0.0'
       - uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
       - name: Build iOS demo without signing
         run: >-
           xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp
           -configuration Debug -sdk iphonesimulator
           -destination 'generic/platform=iOS Simulator'
+          ARCHS=arm64 ONLY_ACTIVE_ARCH=NO
           CODE_SIGNING_ALLOWED=NO build
       - name: Run common tests on iOS simulator
         run: ./gradlew :brutus-calendar:iosSimulatorArm64Test --stacktrace

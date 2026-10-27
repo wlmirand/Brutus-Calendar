@@ -139,6 +139,7 @@
 				MARKETING_VERSION = 0.1.0;
 				OTHER_LDFLAGS = ("$(inherited)", "-framework", BrutusCalendarDemo);
 				PRODUCT_BUNDLE_IDENTIFIER = william.miranda.brutuscalendar.demo.ios;
+				PRODUCT_MODULE_NAME = BrutusCalendarIOSApp;
 				PRODUCT_NAME = BrutusCalendarDemo;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -161,6 +162,7 @@
 				MARKETING_VERSION = 0.1.0;
 				OTHER_LDFLAGS = ("$(inherited)", "-framework", BrutusCalendarDemo);
 				PRODUCT_BUNDLE_IDENTIFIER = william.miranda.brutuscalendar.demo.ios;
+				PRODUCT_MODULE_NAME = BrutusCalendarIOSApp;
 				PRODUCT_NAME = BrutusCalendarDemo;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
