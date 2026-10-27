@@ -52,14 +52,9 @@ public fun ScrollWeekCalendar(
     pagerState: WeekPagerState = rememberWeekPagerState(startingDayOfWeek = DayOfWeek.SUNDAY),
     displayExtraDays: Boolean = false,
     dayOnClick: ((LocalDate) -> Unit)? = null,
-    headerRenderer: @Composable (YearMonth) -> Unit = { DefaultHeaderRenderer(it) },
-    weekDayRenderer: @Composable BoxScope.(DayOfWeek) -> Unit = { DefaultWeekDayRenderer(it) },
-    dayRenderer: @Composable BoxScope.(DayRendererModel) -> Unit = {
-        DefaultDayRenderer(
-            it,
-            dayOnClick
-        )
-    },
+    headerRenderer: @Composable (YearMonth) -> Unit = { yearMonth -> DefaultHeaderRenderer(yearMonth) },
+    weekDayRenderer: @Composable BoxScope.(DayOfWeek) -> Unit = { dayOfWeek -> DefaultWeekDayRenderer(dayOfWeek) },
+    dayRenderer: @Composable BoxScope.(DayRendererModel) -> Unit = { model -> DefaultDayRenderer(model, dayOnClick) },
     verticalAlignment: Alignment.Vertical = Alignment.Top,
     onWeekChangedListener: ((LocalDate) -> Unit)? = null
 ) {
@@ -82,7 +77,8 @@ public fun ScrollWeekCalendar(
     ) { pageNumber ->
         //Display the WeekCalendar
         WeekCalendar(
-            date = pagerState.getFirstDateFromPageNumber(pageNumber),
+            // Keep a partial first week's month reference inside the configured interval.
+            date = pagerState.getFirstDateFromPageNumber(pageNumber).coerceAtLeast(pagerState.firstDate),
             displayHeader = displayHeader,
             displayWeekDaysName = displayWeekDaysName,
             startingWeekDay = pagerState.startingDayOfWeek,

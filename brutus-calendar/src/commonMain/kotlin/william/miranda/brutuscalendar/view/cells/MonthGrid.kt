@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import kotlinx.datetime.DayOfWeek
@@ -31,7 +32,9 @@ internal fun MonthGrid(
     dayRenderer: @Composable BoxScope.(DayRendererModel) -> Unit
 ) {
     //Add nulls to fulfill the 7 days per week
-    val newDays = List(startOffset) { null } + calendarDays
+    val newDays = remember(startOffset, calendarDays) {
+        List(startOffset) { null } + calendarDays
+    }
 
     Column(
         modifier = modifier

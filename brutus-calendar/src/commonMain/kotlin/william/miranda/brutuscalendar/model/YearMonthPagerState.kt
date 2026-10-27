@@ -17,21 +17,28 @@ public class YearMonthPagerState(
     public val firstYearMonth: YearMonth = YearMonth(year = 0, month = Month.JANUARY),
     public val lastYearMonth: YearMonth = YearMonth(year = 9999, month = Month.DECEMBER)
 ) : PagerState(
-    currentPage = firstYearMonth.monthsUntil(startingYearMonth),
+    currentPage = initialMonthPage(firstYearMonth, lastYearMonth, startingYearMonth),
     currentPageOffsetFraction = 0f
 ) {
-    override val pageCount: Int
-        get() = firstYearMonth.monthsUntil(lastYearMonth) + 1
+    override val pageCount: Int = monthPageCount(firstYearMonth, lastYearMonth).toInt()
 
     /**
      * Gets the Page Number from a given YearMonth
      */
-    public fun getPageNumberFromYearMonth(yearMonth: YearMonth): Int = firstYearMonth.monthsUntil(yearMonth)
+    public fun getPageNumberFromYearMonth(yearMonth: YearMonth): Int {
+        require(yearMonth in firstYearMonth..lastYearMonth) {
+            "yearMonth must be within firstYearMonth..lastYearMonth"
+        }
+        return firstYearMonth.monthsUntil(yearMonth)
+    }
 
     /**
      * Gets the YearMonth from a given PageNumber
      */
-    public fun getYearMonthFromPageNumber(pageNumber: Int): YearMonth = firstYearMonth.plus(pageNumber, DateTimeUnit.MONTH)
+    public fun getYearMonthFromPageNumber(pageNumber: Int): YearMonth {
+        require(pageNumber in 0 until pageCount) { "pageNumber must be within 0 until pageCount" }
+        return firstYearMonth.plus(pageNumber, DateTimeUnit.MONTH)
+    }
 
     /**
      * Convenience to Scroll to YearMonth
@@ -49,7 +56,7 @@ public class YearMonthPagerState(
     public suspend fun animateScrollToNextPage(): Unit = animateScrollToPage(currentPage + 1)
 
     public companion object {
-        /** To keep current page and current page offset saved */
+        /** Saves the initial month and bounds; does not save the current scroll position. */
         public val Saver: Saver<YearMonthPagerState, *> =
             listSaver(
                 save = {
@@ -68,4 +75,14 @@ public class YearMonthPagerState(
                 },
             )
     }
+}
+
+private fun monthPageCount(first: YearMonth, last: YearMonth): Long =
+    (last.year.toLong() - first.year.toLong()) * 12 + last.month.ordinal - first.month.ordinal + 1
+
+private fun initialMonthPage(first: YearMonth, last: YearMonth, starting: YearMonth): Int {
+    require(first <= last) { "firstYearMonth must not be after lastYearMonth" }
+    require(starting in first..last) { "startingYearMonth must be within firstYearMonth..lastYearMonth" }
+    require(monthPageCount(first, last) <= Int.MAX_VALUE.toLong()) { "The month interval contains too many pages" }
+    return first.monthsUntil(starting)
 }

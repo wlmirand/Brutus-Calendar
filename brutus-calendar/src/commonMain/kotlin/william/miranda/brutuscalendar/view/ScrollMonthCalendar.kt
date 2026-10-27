@@ -52,9 +52,9 @@ public fun ScrollMonthCalendar(
     dayOnClick: ((LocalDate) -> Unit)? = null,
     verticalAlignment: Alignment.Vertical = Alignment.Top,
     onMonthChangedListener: ((YearMonth) -> Unit)? = null,
-    headerRenderer: @Composable (YearMonth) -> Unit = { DefaultHeaderRenderer(it) },
-    weekDayRenderer: @Composable BoxScope.(DayOfWeek) -> Unit = { DefaultWeekDayRenderer(it) },
-    dayRenderer: @Composable BoxScope.(DayRendererModel) -> Unit = { DefaultDayRenderer(it, dayOnClick) },
+    headerRenderer: @Composable (YearMonth) -> Unit = { yearMonth -> DefaultHeaderRenderer(yearMonth) },
+    weekDayRenderer: @Composable BoxScope.(DayOfWeek) -> Unit = { dayOfWeek -> DefaultWeekDayRenderer(dayOfWeek) },
+    dayRenderer: @Composable BoxScope.(DayRendererModel) -> Unit = { model -> DefaultDayRenderer(model, dayOnClick) },
 ) {
     // Keep the latest listener without restarting the page observation.
     val currentOnMonthChangedListener = rememberUpdatedState(onMonthChangedListener)

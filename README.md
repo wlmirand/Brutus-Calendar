@@ -115,7 +115,9 @@ fun ScrollableMonthExample() {
 
 `firstYearMonth` and `lastYearMonth` are inclusive. Supply an ordered interval
 containing `startingYearMonth`. Keep the state remembered rather than constructing
-a new instance on each recomposition.
+a new instance on each recomposition. Invalid intervals or initial positions throw
+`IllegalArgumentException`, as do explicit conversions/navigation targets outside
+the configured interval.
 
 This example uses `remember`: it retains the state across
 recompositions, but does not provide persistence across activity or process recreation.
@@ -153,6 +155,11 @@ navigate when an adjacent-month date is clicked.
 
 ### Custom renderers
 
+To match your application's design, declare your own composable renderers and
+pass them to the calendar. Your renderers own their colors, typography, shapes,
+backgrounds, and interaction styling. Use Foundation, Material, or your own design
+system; the calendar does not impose a styling model on custom content.
+
 Both monthly composables accept these slots:
 
 | Slot | Signature | Purpose |
@@ -164,6 +171,15 @@ Both monthly composables accept these slots:
 `DayRendererModel.date` is the cell's date. `calendarYearMonth` is the month being
 displayed, which may differ from the cell's month when extra days are enabled.
 The slots do not require Material; the default renderers use Foundation `BasicText`.
+The built-in renderers provide a basic appearance when a slot is omitted. They
+are internal implementations, not a public styling API. You can use
+[`DefaultHeaderRenderer`, `DefaultWeekDayRenderer`, and `DefaultDayRenderer`](brutus-calendar/src/commonMain/kotlin/william/miranda/brutuscalendar/helper/Renderer.kt)
+as source references when writing your own renderers, without depending on their
+internal color configuration.
+
+Default month and weekday labels use English enum names. For localized labels,
+provide `headerRenderer` and `weekDayRenderer` using your application's localization
+resources or date formatter; there is no library-level locale setting.
 
 Here is a custom day renderer with externally owned selection and no Material dependency:
 
@@ -270,7 +286,7 @@ fun ScrollableWeekExample() {
         pagerState = pagerState,
         displayExtraDays = true,
         onWeekChangedListener = { date ->
-            // React to the reference date of the settled page.
+            // React to the first weekday of the settled page.
         },
     )
 }
@@ -280,6 +296,11 @@ This example uses a Monday-aligned interval covering four complete weeks and
 starts on its second page. `startingDate` selects the initial position;
 `firstDate` and `lastDate` configure the interval. Supply an ordered interval
 containing `startingDate`.
+
+The interval is inclusive. Invalid bounds, initial dates, navigation dates, or
+page indices passed to conversion methods throw `IllegalArgumentException`.
+Partial weeks count as pages, and initial-page selection and date navigation use
+the same first-weekday alignment as page rendering.
 
 `rememberWeekPagerState` requires `startingDayOfWeek` and defaults `startingDate`
 to `firstDate`. If no state is supplied to `ScrollWeekCalendar`, its default
@@ -311,16 +332,20 @@ Call suspend navigation functions from a coroutine and disable previous/next
 controls at the interval boundaries, as in the monthly demo.
 
 `onWeekChangedListener` observes `settledPage`, fires initially and when the
-settled page changes, and reports the same reference date used for rendering.
+settled page changes, and reports the first weekday of the displayed week.
 Replacing the listener alone does not trigger a new notification.
 
-Despite its name, `getFirstDateFromPageNumber` currently returns a **page reference
-date** computed as `firstDate + pageNumber * one week`. It is only the first
-visible weekday when `firstDate` is aligned with `startingDayOfWeek`.
-`WeekCalendar` expands that reference into a calendar week. For unaligned bounds,
-verify navigation and initial-page mapping for your use case. Date bounds are
-not a cell-level click filter; `displayExtraDays` controls adjacent-month dates,
-not whether a date falls inside the pager interval.
+`getFirstDateFromPageNumber` returns the actual start of the calendar week,
+aligned to `startingDayOfWeek`. For example, with `firstDate = July 1, 2026` and
+Sunday as the first weekday, page 0 starts on June 28 and page 1 starts on July 5.
+Navigating to July 5 selects page 1.
+
+The first page and its callback date may start before `firstDate`. For a partial
+first week, the pager uses `firstDate` as the header/month reference so dates in
+the requested month are not hidden when `displayExtraDays = false`. Other pages
+use their week start as the month reference. Date bounds are not a cell-level
+click filter; `displayExtraDays` controls adjacent-month dates, not whether a
+date falls inside the pager interval.
 
 Both weekly composables accept `displayHeader`, `displayWeekDaysName`,
 `displayExtraDays`, `dayOnClick`, and the same renderer signatures as the monthly

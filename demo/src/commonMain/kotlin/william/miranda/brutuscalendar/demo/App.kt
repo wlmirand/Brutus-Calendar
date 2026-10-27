@@ -105,7 +105,7 @@ fun App() {
                         modifier = Modifier.fillMaxWidth().padding(12.dp),
                         pagerState = pagerState,
                         startingWeekDay = DayOfWeek.SUNDAY,
-                        displayExtraDays = true,
+                        displayExtraDays = false,
                         headerRenderer = { yearMonth ->
                             DemoMonthHeader(
                                 yearMonth = yearMonth,

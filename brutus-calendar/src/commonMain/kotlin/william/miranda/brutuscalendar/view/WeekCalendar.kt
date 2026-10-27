@@ -35,17 +35,8 @@ public fun WeekCalendar(
     displayExtraDays: Boolean = false,
     dayOnClick: ((LocalDate) -> Unit)? = null,
     headerRenderer: @Composable (YearMonth) -> Unit = { yearMonth -> DefaultHeaderRenderer(yearMonth) },
-    weekDayRenderer: @Composable BoxScope.(DayOfWeek) -> Unit = { dayOfWeek ->
-        DefaultWeekDayRenderer(
-            dayOfWeek
-        )
-    },
-    dayRenderer: @Composable BoxScope.(DayRendererModel) -> Unit = { model ->
-        DefaultDayRenderer(
-            model,
-            dayOnClick
-        )
-    }
+    weekDayRenderer: @Composable BoxScope.(DayOfWeek) -> Unit = { dayOfWeek -> DefaultWeekDayRenderer(dayOfWeek) },
+    dayRenderer: @Composable BoxScope.(DayRendererModel) -> Unit = { model -> DefaultDayRenderer(model, dayOnClick) }
 ) {
     //List to Hold the Week Days, in the order we should display them
     val weekDays = remember(startingWeekDay) { getWeekDays(startingWeekDay) }
@@ -69,13 +60,13 @@ public fun WeekCalendar(
     //List of the interval to be displayed
     //We need to prepare a list of 7 elements to be displayed (ensured by firstDay..lastDay)
     //If by any means the item should not be displayed, we set it to null
-    val daysList = remember(firstDay, lastDay, displayExtraDays) {
+    val daysList = remember(firstDay, lastDay, displayExtraDays, date.yearMonth) {
         val list = (firstDay..lastDay).toList(DateTimeUnit.DAY)
 
         if (!displayExtraDays) {
             //No extra days, so we need to check elements to be excluded
             list.map { element ->
-                if (element.month == date.month) element else null
+                if (element.yearMonth == date.yearMonth) element else null
             }
         } else {
             //Display extra days so, just return the original list

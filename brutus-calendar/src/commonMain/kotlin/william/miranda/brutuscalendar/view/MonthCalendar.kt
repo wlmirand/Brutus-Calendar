@@ -32,17 +32,8 @@ public fun MonthCalendar(
     displayExtraDays: Boolean = false,
     dayOnClick: ((LocalDate) -> Unit)? = null,
     headerRenderer: @Composable (YearMonth) -> Unit = { yearMonth -> DefaultHeaderRenderer(yearMonth) },
-    weekDayRenderer: @Composable BoxScope.(DayOfWeek) -> Unit = { dayOfWeek ->
-        DefaultWeekDayRenderer(
-            dayOfWeek
-        )
-    },
-    dayRenderer: @Composable BoxScope.(DayRendererModel) -> Unit = { model ->
-        DefaultDayRenderer(
-            model,
-            dayOnClick
-        )
-    }
+    weekDayRenderer: @Composable BoxScope.(DayOfWeek) -> Unit = { dayOfWeek -> DefaultWeekDayRenderer(dayOfWeek) },
+    dayRenderer: @Composable BoxScope.(DayRendererModel) -> Unit = { model -> DefaultDayRenderer(model, dayOnClick) }
 ) {
     //List to Hold the Week Days, in the order we should display them
     val weekDays = remember(startingWeekDay) { getWeekDays(startingWeekDay) }
@@ -75,6 +66,10 @@ public fun MonthCalendar(
         }
     }
 
+    val calendarDays = remember(firstDay, lastDay) {
+        (firstDay..lastDay).toList()
+    }
+
     Column(modifier = modifier) {
         //Header
         if (displayHeader) {
@@ -86,7 +81,7 @@ public fun MonthCalendar(
             modifier = Modifier.fillMaxWidth(),
             yearMonth = yearMonth,
             weekDays = if (displayWeekDaysName) weekDays else emptyList(),
-            calendarDays = (firstDay..lastDay).toList(),
+            calendarDays = calendarDays,
             startOffset = firstDayOffset,
             weekDayRenderer = weekDayRenderer,
             dayRenderer = dayRenderer
