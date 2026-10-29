@@ -61,12 +61,12 @@ public class WeekPagerState(
     public suspend fun animateScrollToNextPage(): Unit = animateScrollToPage(currentPage + 1)
 
     public companion object {
-        /** Saves the initial date, first weekday, and bounds; does not save the current scroll position. */
+        /** Saves the settled week's first date, first weekday, and bounds; does not save the fractional scroll offset. */
         public val Saver: Saver<WeekPagerState, Any> =
             listSaver(
                 save = {
                     listOf(
-                        it.startingDate,
+                        maxOf(it.firstDate, it.getFirstDateFromPageNumber(it.settledPage)),
                         it.startingDayOfWeek,
                         it.firstDate,
                         it.lastDate,

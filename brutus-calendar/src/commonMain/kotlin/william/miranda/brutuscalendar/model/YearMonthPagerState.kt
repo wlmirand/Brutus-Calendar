@@ -56,12 +56,12 @@ public class YearMonthPagerState(
     public suspend fun animateScrollToNextPage(): Unit = animateScrollToPage(currentPage + 1)
 
     public companion object {
-        /** Saves the initial month and bounds; does not save the current scroll position. */
+        /** Saves the settled month and bounds; does not save the fractional scroll offset. */
         public val Saver: Saver<YearMonthPagerState, *> =
             listSaver(
                 save = {
                     listOf(
-                        it.startingYearMonth,
+                        it.getYearMonthFromPageNumber(it.settledPage),
                         it.firstYearMonth,
                         it.lastYearMonth,
                     )

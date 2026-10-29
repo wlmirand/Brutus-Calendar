@@ -121,8 +121,10 @@ the configured interval.
 
 This example uses `remember`: it retains the state across
 recompositions, but does not provide persistence across activity or process recreation.
-The library also exposes `rememberYearMonthPagerState`; its saved-state behavior
-still requires platform validation before relying on it for persistence.
+The library also exposes `rememberYearMonthPagerState`, which uses
+`YearMonthPagerState.Saver`. It saves the settled month and the bounds, so the
+calendar is restored on the month it was showing. The fractional scroll offset is
+not saved.
 
 `onMonthChangedListener` observes `settledPage`, so it fires initially and when the
 pager settles on a different page, rather than on every intermediate page during
@@ -312,9 +314,9 @@ practical interval and initial date.
 configuration for the pager and its rendered weeks. Unlike `WeekCalendar`,
 `ScrollWeekCalendar` does **not** accept a separate `startingWeekDay` parameter.
 
-The remembered state reconstructs the starting date, first weekday, and date
-bounds. It does not save the current page or fractional scroll offset. Its saved-state behavior
-still requires validation; no process-recreation guarantee is made here.
+The remembered state saves the settled week, first weekday, and date bounds, so
+it is restored on the week it was showing. The fractional scroll offset is not
+saved.
 Factory arguments initialize the state rather than reactively updating an existing
 instance on recomposition.
 
